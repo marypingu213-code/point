@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>學生進度看板</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background-color: #282c34; color: white; margin: 0; }
+        h1 { text-align: center; margin-bottom: 40px; color: #61dafb; }
+        .chart-container { max-width: 800px; margin: 0 auto; }
+        .student-row { margin-bottom: 25px; display: flex; align-items: center; }
+        .student-name { width: 80px; font-size: 22px; font-weight: bold; }
+        
+        /* 長條圖外框 (總分10分) */
+        .bar-wrapper { flex-grow: 1; background-color: #444; height: 40px; border-radius: 20px; overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+        
+        /* 長條圖進度條 */
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 20px; }
+        
+        .score-text { width: 50px; text-align: right; font-size: 24px; font-weight: bold; color: #ffeb3b; margin-left: 15px; }
+    </style>
+</head>
+<body>
+
+    <h1>🏆 學生即時進度表 (滿分 10 分)</h1>
+    <div class="chart-container" id="chart-panel"></div>
+
+    <script>
+        function updateChart(students) {
+            const panel = document.getElementById('chart-panel');
+            panel.innerHTML = '';
+            
+            students.forEach(student => {
+                // 計算長條圖的寬度百分比 (總分 10 分)
+                const percentage = (student.score / 10) * 100;
+                
+                panel.innerHTML += `
+                    <div class="student-row">
+                        <div class="student-name">${student.name}</div>
+                        <div class="bar-wrapper">
+                            <div class="bar-fill" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="score-text">${student.score}</div>
+                    </div>
+                `;
+            });
+        }
+
+        // 頁面載入時先讀取一次資料
+        function loadScores() {
+            const data = localStorage.getItem('classScores');
+            if (data) {
+                updateChart(JSON.parse(data));
+            }
+        }
+
+        // 監聽其他視窗 (大螢幕控制台) 的資料變更
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'classScores') {
+                updateChart(JSON.parse(e.newValue));
+            }
+        });
+
+        // 初始化
+        loadScores();
+    </script>
+</body>
+</html>
