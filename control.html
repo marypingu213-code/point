@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>教師控制台 - 即時加分</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .student-card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .score { font-size: 24px; font-weight: bold; color: #333; margin: 0 20px; }
+        button { padding: 10px 20px; font-size: 18px; cursor: pointer; border: none; border-radius: 5px; color: white; }
+        .btn-add { background-color: #4CAF50; }
+        .btn-sub { background-color: #f44336; }
+        .btn-reset { background-color: #ff9800; margin-top: 20px; width: 100%; }
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <h1>📝 教師控制台 (大螢幕)</h1>
+    
+    <div id="control-panel"></div>
+    <button class="btn-reset" onclick="resetScores()">🔄 重置所有分數</button>
+
+    <script>
+        // 預設學生名單與分數
+        let students = JSON.parse(localStorage.getItem('classScores')) || [
+            { id: 1, name: '小明', score: 0 },
+            { id: 2, name: '小華', score: 0 },
+            { id: 3, name: '小美', score: 0 }
+        ];
+
+        function renderControlPanel() {
+            const panel = document.getElementById('control-panel');
+            panel.innerHTML = '';
+            students.forEach((student, index) => {
+                panel.innerHTML += `
+                    <div class="student-card">
+                        <span style="font-size: 20px;">${student.name}</span>
+                        <div>
+                            <button class="btn-sub" onclick="changeScore(${index}, -1)">-1</button>
+                            <span class="score">${student.score}</span>
+                            <button class="btn-add" onclick="changeScore(${index}, 1)">+1</button>
+                        </div>
+                    </div>
+                `;
+            });
+            // 將資料同步到瀏覽器儲存空間，讓另一個視窗可以讀取
+            localStorage.setItem('classScores', JSON.stringify(students));
+        }
+
+        function changeScore(index, amount) {
+            let newScore = students[index].score + amount;
+            // 限制分數在 0 到 10 之間
+            if (newScore >= 0 && newScore <= 10) {
+                students[index].score = newScore;
+                renderControlPanel();
+            }
+        }
+
+        function resetScores() {
+            if(confirm('確定要將所有學生分數歸零嗎？')) {
+                students.forEach(s => s.score = 0);
+                renderControlPanel();
+            }
+        }
+
+        // 初始化
+        renderControlPanel();
+    </script>
+</body>
+</html>
